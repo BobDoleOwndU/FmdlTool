@@ -29,6 +29,12 @@ namespace FmdlTool
             public ushort materialId;
         } //struct
 
+        private struct Section7Entry
+        {
+            public ushort nameId;
+            public ushort textureId;
+        } //struct
+
         private uint signature;
         private uint unknown0;
         private ulong unknown1;
@@ -64,10 +70,11 @@ namespace FmdlTool
          * 18 = 0x15
          * 19 = 0x16
          */
-        private SectionInfo[] sectionInfo = new SectionInfo[0x14];
+        private SectionInfo[] sectionInfo = new SectionInfo[20];
 
         private Section1Entry[] section1Entries;
         private Section2Entry[] section2Entries;
+        private Section7Entry[] section7Entries;
         private ulong[] section15Entries;
         private ulong[] section16Entries;
 
@@ -98,6 +105,7 @@ namespace FmdlTool
 
             section1Entries = new Section1Entry[sectionInfo[1].numEntries];
             section2Entries = new Section2Entry[sectionInfo[2].numEntries];
+            section7Entries = new Section7Entry[sectionInfo[7].numEntries];
             section15Entries = new ulong[sectionInfo[18].numEntries];
             section16Entries = new ulong[sectionInfo[19].numEntries];
 
@@ -143,6 +151,15 @@ namespace FmdlTool
                 section2Entries[i].materialId = reader.ReadUInt16();
                 reader.BaseStream.Position += 0xE;
             } //for
+
+            //go to and get the section 0x16 entry info.
+            reader.BaseStream.Position = sectionInfo[7].offset + headerLength;
+
+            for (int i = 0; i < section7Entries.Length; i++)
+            {
+                section7Entries[i].nameId = reader.ReadUInt16();
+                section7Entries[i].textureId = reader.ReadUInt16();
+            } //for
         } //Read
 
         public void OutputSection2Info()
@@ -155,7 +172,18 @@ namespace FmdlTool
                 Console.WriteLine("Number of Objects: " + section2Entries[i].numObjects);
                 Console.WriteLine("Number of Preceding Objects: " + section2Entries[i].numPrecedingObjects);
                 Console.WriteLine("Material ID: " + section2Entries[i].materialId);
-            }
-        } //for ends
+            } //for
+        } //OutputSection2Info
+
+        public void OutputSection7Info()
+        {
+            for (int i = 0; i < section7Entries.Length; i++)
+            {
+                Console.WriteLine("================================");
+                Console.WriteLine("Entry No: " + i);
+                Console.WriteLine("Material Hash: " + section16Entries[section7Entries[i].nameId].ToString("x"));
+                Console.WriteLine("Texture Hash: " + section15Entries[section7Entries[i].textureId].ToString("x"));
+            } //for
+        } //OutputSection2Info
     } //class
 } //namespace
