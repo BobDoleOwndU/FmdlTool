@@ -35,13 +35,19 @@ namespace FmdlTool
             public ushort textureId;
         } //struct
 
+        private struct Section8Entry
+        {
+            public ushort nameId;
+            public ushort materialNameId;
+        } //struct
+
         private uint signature;
         private uint unknown0;
         private ulong unknown1;
         private ulong unknown2;
         private ulong unknown3;
+        private uint numSections;
         private uint unknown4;
-        private uint unknown5;
         private uint headerLength;
         private uint dataOffset0;
         private uint dataOffset1;
@@ -70,11 +76,12 @@ namespace FmdlTool
          * 18 = 0x15
          * 19 = 0x16
          */
-        private SectionInfo[] sectionInfo = new SectionInfo[20];
+        private SectionInfo[] sectionInfo;
 
         private Section1Entry[] section1Entries;
         private Section2Entry[] section2Entries;
         private Section7Entry[] section7Entries;
+        private Section8Entry[] section8Entries;
         private ulong[] section15Entries;
         private ulong[] section16Entries;
 
@@ -87,13 +94,15 @@ namespace FmdlTool
             unknown1 = reader.ReadUInt64();
             unknown2 = reader.ReadUInt64();
             unknown3 = reader.ReadUInt64();
+            numSections = reader.ReadUInt32();
             unknown4 = reader.ReadUInt32();
-            unknown5 = reader.ReadUInt32();
             headerLength = reader.ReadUInt32();
             dataOffset0 = reader.ReadUInt32();
             dataOffset1 = reader.ReadUInt32();
             dataLength = reader.ReadUInt32();
             reader.BaseStream.Position += 0x8; //8 bytes of padding here.
+
+            sectionInfo = new SectionInfo[numSections];
 
             //get the section info.
             for(int i = 0; i < sectionInfo.Length; i++)
@@ -106,6 +115,7 @@ namespace FmdlTool
             section1Entries = new Section1Entry[sectionInfo[1].numEntries];
             section2Entries = new Section2Entry[sectionInfo[2].numEntries];
             section7Entries = new Section7Entry[sectionInfo[7].numEntries];
+            section8Entries = new Section8Entry[sectionInfo[8].numEntries];
             section15Entries = new ulong[sectionInfo[18].numEntries];
             section16Entries = new ulong[sectionInfo[19].numEntries];
 
@@ -152,13 +162,22 @@ namespace FmdlTool
                 reader.BaseStream.Position += 0xE;
             } //for
 
-            //go to and get the section 0x16 entry info.
+            //go to and get the section 0x7 entry info.
             reader.BaseStream.Position = sectionInfo[7].offset + headerLength;
 
             for (int i = 0; i < section7Entries.Length; i++)
             {
                 section7Entries[i].nameId = reader.ReadUInt16();
                 section7Entries[i].textureId = reader.ReadUInt16();
+            } //for
+
+            //go to and get the section 0x8 entry info.
+            reader.BaseStream.Position = sectionInfo[8].offset + headerLength;
+
+            for (int i = 0; i < section8Entries.Length; i++)
+            {
+                section8Entries[i].nameId = reader.ReadUInt16();
+                section8Entries[i].materialNameId = reader.ReadUInt16();
             } //for
         } //Read
 
@@ -181,8 +200,29 @@ namespace FmdlTool
             {
                 Console.WriteLine("================================");
                 Console.WriteLine("Entry No: " + i);
-                Console.WriteLine("Material Hash: " + section16Entries[section7Entries[i].nameId].ToString("x"));
-                Console.WriteLine("Texture Hash: " + section15Entries[section7Entries[i].textureId].ToString("x"));
+                Console.WriteLine("Texture Type Hash: " + section16Entries[section7Entries[i].nameId].ToString("x"));
+                Console.WriteLine("Texture Hash: " + (section15Entries[section7Entries[i].textureId] - 0x1568000000000000).ToString("x"));
+            } //for
+        } //OutputSection2Info
+
+        public void OutputSection8Info()
+        {
+            for (int i = 0; i < section8Entries.Length; i++)
+            {
+                Console.WriteLine("================================");
+                Console.WriteLine("Entry No: " + i);
+                Console.WriteLine("Unknown Hash: " + (section16Entries[section8Entries[i].nameId]).ToString("x"));
+                Console.WriteLine("Material Hash: " + (section16Entries[section8Entries[i].materialNameId]).ToString("x"));
+            } //for
+        } //OutputSection2Info
+
+        public void OutputSection16Info()
+        {
+            for (int i = 0; i < section16Entries.Length; i++)
+            {
+                Console.WriteLine("================================");
+                Console.WriteLine("Entry No: " + i);
+                Console.WriteLine("Hash: " + section16Entries[i].ToString("x"));
             } //for
         } //OutputSection2Info
     } //class

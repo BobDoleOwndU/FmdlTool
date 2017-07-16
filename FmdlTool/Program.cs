@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace FmdlTool
 {
@@ -11,9 +12,10 @@ namespace FmdlTool
                 {
                     Fmdl file = new Fmdl();
                     file.Read(stream);
-                    file.OutputSection7Info();
+                    file.OutputSection8Info();
                     stream.Close();
                 } //using
+            Console.ReadKey();
         } //Main
     } //class
 } //namespace
