@@ -302,6 +302,10 @@ namespace FmdlTool
                     objects[i].vertices[j].y = reader.ReadSingle();
                     objects[i].vertices[j].z = reader.ReadSingle();
                 } //for
+
+                //align the stream.
+                if (reader.BaseStream.Position % 0x10 != 0)
+                    reader.BaseStream.Position += (0x10 - reader.BaseStream.Position % 0x10);
             } //for
 
             /*
