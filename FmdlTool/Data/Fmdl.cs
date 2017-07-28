@@ -74,6 +74,11 @@ namespace FmdlTool
             public ushort materialNameId;
         } //struct
 
+        private struct Section0BlockDEntry
+        {
+            public float[] entries;
+        } //struct
+
         private struct Vertex
         {
             public float x;
@@ -142,6 +147,7 @@ namespace FmdlTool
         private Section0Block6Entry[] section0Block6Entries;
         private Section0Block7Entry[] section0Block7Entries;
         private Section0Block8Entry[] section0Block8Entries;
+        private Section0BlockDEntry[] section0BlockDEntries;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
 
@@ -189,6 +195,7 @@ namespace FmdlTool
             section0Block6Entries = new Section0Block6Entry[section0Info[6].numEntries];
             section0Block7Entries = new Section0Block7Entry[section0Info[7].numEntries];
             section0Block8Entries = new Section0Block8Entry[section0Info[8].numEntries];
+            section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
             section0Block15Entries = new ulong[section0Info[18].numEntries];
             section0Block16Entries = new ulong[section0Info[19].numEntries];
 
@@ -310,6 +317,22 @@ namespace FmdlTool
             {
                 section0Block8Entries[i].nameId = reader.ReadUInt16();
                 section0Block8Entries[i].materialNameId = reader.ReadUInt16();
+            } //for
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0xD - UNKNOWN - FLOATS
+             *
+             ****************************************************************/
+            //go to and get the section 0xD entry info.
+            reader.BaseStream.Position = section0Info[12].offset + section0Offset;
+
+            for (int i = 0; i < section0BlockDEntries.Length; i++)
+            {
+                section0BlockDEntries[i].entries = new float[8];
+
+                for (int j = 0; j < section0BlockDEntries[i].entries.Length; j++)
+                    section0BlockDEntries[i].entries[j] = reader.ReadSingle();
             } //for
 
             /****************************************************************
@@ -458,6 +481,26 @@ namespace FmdlTool
                 Console.WriteLine("Entry No: " + i);
                 Console.WriteLine("Unknown Hash: " + (section0Block16Entries[section0Block8Entries[i].nameId]).ToString("x"));
                 Console.WriteLine("Material Hash: " + (section0Block16Entries[section0Block8Entries[i].materialNameId]).ToString("x"));
+            } //for
+        } //OutputSection2Info
+
+        public void OutputSection0BlockDInfo()
+        {
+            for (int i = 0; i < section0BlockDEntries.Length; i++)
+            {
+                Console.WriteLine("================================");
+                Console.WriteLine("Entry No: " + i);
+                Console.Write("Floats: [");
+
+                for (int j = 0; j < section0BlockDEntries[i].entries.Length; j++)
+                {
+                    Console.Write(section0BlockDEntries[i].entries[j]);
+
+                    if (j != section0BlockDEntries[i].entries.Length - 1)
+                        Console.Write(", ");
+                } //for
+
+                Console.WriteLine("]");
             } //for
         } //OutputSection2Info
 

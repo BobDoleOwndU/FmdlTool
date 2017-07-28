@@ -12,7 +12,7 @@ namespace FmdlTool
                 {
                     Fmdl file = new Fmdl();
                     file.Read(stream);
-                    file.OutputSection0Block5Info();
+                    file.OutputSection0BlockDInfo();
                     stream.Close();
                 } //using
             Console.ReadKey();
