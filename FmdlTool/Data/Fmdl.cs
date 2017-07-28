@@ -21,6 +21,22 @@ namespace FmdlTool
             public uint length;
         } //struct
 
+        private struct Section0Block0Entry
+        {
+            public ushort id;
+            public ushort parentId;
+            public ushort unknown0; //id of some sort
+            public ushort unknown1; //always 0x1?
+            public float x0;
+            public float y0;
+            public float z0;
+            public float w0;
+            public float x1;
+            public float y1;
+            public float z1;
+            public float w1;
+        } //struct
+
         private struct Section0Block1Entry
         {
             public ushort nameId;
@@ -77,6 +93,14 @@ namespace FmdlTool
         private struct Section0BlockDEntry
         {
             public float[] entries;
+        } //struct
+
+        private struct Section0Block10Entry
+        {
+            public uint unknown0;
+            public float highDetailDistance;
+            public float midDetailDistance;
+            public float lowDetailDistance;
         } //struct
 
         private struct Vertex
@@ -140,6 +164,7 @@ namespace FmdlTool
         private Section0Info[] section0Info;
         private Section1Info[] section1Info;
 
+        private Section0Block0Entry[] section0Block0Entries;
         private Section0Block1Entry[] section0Block1Entries;
         private Section0Block2Entry[] section0Block2Entries;
         private Section0Block3Entry[] section0Block3Entries;
@@ -148,6 +173,7 @@ namespace FmdlTool
         private Section0Block7Entry[] section0Block7Entries;
         private Section0Block8Entry[] section0Block8Entries;
         private Section0BlockDEntry[] section0BlockDEntries;
+        private Section0Block10Entry[] section0Block10Entries;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
 
@@ -188,6 +214,7 @@ namespace FmdlTool
                 section1Info[i].length = reader.ReadUInt32();
             } //for
 
+            section0Block0Entries = new Section0Block0Entry[section0Info[0].numEntries];
             section0Block1Entries = new Section0Block1Entry[section0Info[1].numEntries];
             section0Block2Entries = new Section0Block2Entry[section0Info[2].numEntries];
             section0Block3Entries = new Section0Block3Entry[section0Info[3].numEntries];
@@ -196,10 +223,36 @@ namespace FmdlTool
             section0Block7Entries = new Section0Block7Entry[section0Info[7].numEntries];
             section0Block8Entries = new Section0Block8Entry[section0Info[8].numEntries];
             section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
+            section0Block10Entries = new Section0Block10Entry[section0Info[14].numEntries];
             section0Block15Entries = new ulong[section0Info[18].numEntries];
             section0Block16Entries = new ulong[section0Info[19].numEntries];
 
             objects = new Object[section0Info[3].numEntries];
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0x0 - BONE DEFINITIONS
+             *
+             ****************************************************************/
+            //go to and get the section 0x0 entry info.
+            reader.BaseStream.Position = section0Info[0].offset + section0Offset;
+
+            for (int i = 0; i < section0Block0Entries.Length; i++)
+            {
+                section0Block0Entries[i].id = reader.ReadUInt16();
+                section0Block0Entries[i].parentId = reader.ReadUInt16();
+                section0Block0Entries[i].unknown0 = reader.ReadUInt16();
+                section0Block0Entries[i].unknown1 = reader.ReadUInt16();
+                reader.BaseStream.Position += 0x8;
+                section0Block0Entries[i].x0 = reader.ReadSingle();
+                section0Block0Entries[i].y0 = reader.ReadSingle();
+                section0Block0Entries[i].z0 = reader.ReadSingle();
+                section0Block0Entries[i].w0 = reader.ReadSingle();
+                section0Block0Entries[i].x1 = reader.ReadSingle();
+                section0Block0Entries[i].y1 = reader.ReadSingle();
+                section0Block0Entries[i].z1 = reader.ReadSingle();
+                section0Block0Entries[i].w1 = reader.ReadSingle();
+            } //for
 
             /****************************************************************
              *
@@ -333,6 +386,22 @@ namespace FmdlTool
 
                 for (int j = 0; j < section0BlockDEntries[i].entries.Length; j++)
                     section0BlockDEntries[i].entries[j] = reader.ReadSingle();
+            } //for
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0x10 - LOD Camera Distances
+             *
+             ****************************************************************/
+            //go to and get the section 0x10 entry info.
+            reader.BaseStream.Position = section0Info[14].offset + section0Offset;
+
+            for (int i = 0; i < section0Block10Entries.Length; i++)
+            {
+                section0Block10Entries[i].unknown0 = reader.ReadUInt32();
+                section0Block10Entries[i].highDetailDistance = reader.ReadSingle();
+                section0Block10Entries[i].midDetailDistance = reader.ReadSingle();
+                section0Block10Entries[i].lowDetailDistance = reader.ReadSingle();
             } //for
 
             /****************************************************************
