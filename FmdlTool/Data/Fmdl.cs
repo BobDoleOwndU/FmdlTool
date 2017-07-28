@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -38,13 +39,27 @@ namespace FmdlTool
 
         private struct Section3Entry
         {
-            public ushort unknown0;
-            public ushort unknown1;
-            public ushort unknown2;
+            public uint unknown0;
+            public ushort unknown1; //probably related to section 0x4
+            public ushort unknown2; //probably related to section 0x5
+            public ushort id;
             public ushort numVertices;
             public uint faceOffset;
             public uint numFaceVertices;
-            public ulong unknown3;
+            public ulong unknown3; //probably related to section 0xA or 0x11
+        } //struct
+
+        private struct Section5Entry
+        {
+            public ushort unknown0;
+            public ushort numEntries;
+            public ushort[] entries;
+        } //struct
+
+        private struct Section6Entry
+        {
+            public ushort nameId;
+            public ushort textureId;
         } //struct
 
         private struct Section7Entry
@@ -123,6 +138,8 @@ namespace FmdlTool
         private Section1Entry[] section1Entries;
         private Section2Entry[] section2Entries;
         private Section3Entry[] section3Entries;
+        private Section5Entry[] section5Entries;
+        private Section6Entry[] section6Entries;
         private Section7Entry[] section7Entries;
         private Section8Entry[] section8Entries;
         private ulong[] section15Entries;
@@ -168,6 +185,8 @@ namespace FmdlTool
             section1Entries = new Section1Entry[section0Info[1].numEntries];
             section2Entries = new Section2Entry[section0Info[2].numEntries];
             section3Entries = new Section3Entry[section0Info[3].numEntries];
+            section5Entries = new Section5Entry[section0Info[5].numEntries];
+            section6Entries = new Section6Entry[section0Info[6].numEntries];
             section7Entries = new Section7Entry[section0Info[7].numEntries];
             section8Entries = new Section8Entry[section0Info[8].numEntries];
             section15Entries = new ulong[section0Info[18].numEntries];
@@ -219,16 +238,50 @@ namespace FmdlTool
 
             for(int i = 0; i < section3Entries.Length; i++)
             {
-                reader.BaseStream.Position += 0x4;
-                section3Entries[i].unknown0 = reader.ReadUInt16();
+                section3Entries[i].unknown0 = reader.ReadUInt32();
                 section3Entries[i].unknown1 = reader.ReadUInt16();
                 section3Entries[i].unknown2 = reader.ReadUInt16();
+                section3Entries[i].id = reader.ReadUInt16();
                 section3Entries[i].numVertices = reader.ReadUInt16();
                 reader.BaseStream.Position += 0x4;
                 section3Entries[i].faceOffset = reader.ReadUInt32();
                 section3Entries[i].numFaceVertices = reader.ReadUInt32();
                 section3Entries[1].unknown3 = reader.ReadUInt64();
                 reader.BaseStream.Position += 0x10;
+            } //for
+
+            /****************************************************************
+             *
+             * SECTION 0x5 - UNKNOWN
+             *
+             ****************************************************************/
+            //go to and get the section 0x5 entry info.
+            reader.BaseStream.Position = section0Info[5].offset + section0Offset;
+
+            for(int i = 0; i < section5Entries.Length; i++)
+            {
+                section5Entries[i].unknown0 = reader.ReadUInt16();
+                section5Entries[i].numEntries = reader.ReadUInt16();
+                section5Entries[i].entries = new ushort[section5Entries[i].numEntries];
+
+                for (int j = 0; j < section5Entries[i].entries.Length; j++)
+                    section5Entries[i].entries[j] = reader.ReadUInt16();
+
+                reader.BaseStream.Position += 0x40 - section5Entries[i].numEntries * 2;
+            } //for ends
+
+            /****************************************************************
+             *
+             * SECTION 0x6 - UNKNOWN - TEXTURE RELATED
+             *
+             ****************************************************************/
+            //go to and get the section 0x6 entry info.
+            reader.BaseStream.Position = section0Info[6].offset + section0Offset;
+
+            for (int i = 0; i < section6Entries.Length; i++)
+            {
+                section6Entries[i].nameId = reader.ReadUInt16();
+                section6Entries[i].textureId = reader.ReadUInt16();
             } //for
 
             /****************************************************************
@@ -247,7 +300,7 @@ namespace FmdlTool
 
             /****************************************************************
              *
-             * SECTION 0x8 - UNKNOWN
+             * SECTION 0x8 - UNKNOWN - MATERIAL RELATED
              *
              ****************************************************************/
             //go to and get the section 0x8 entry info.
@@ -336,6 +389,54 @@ namespace FmdlTool
                 Console.WriteLine("Number of Preceding Objects: " + section2Entries[i].numPrecedingObjects);
                 Console.WriteLine("Material ID: " + section2Entries[i].materialId);
             } //for
+        } //OutputSection2Info
+
+        [Conditional("DEBUG")]
+        public void OutputSection3Info()
+        {
+            uint greatestUnknown1 = 0;
+            uint greatestUnknown2 = 0;
+            ulong greatestUnknown3 = 0;
+            uint greatestId = 0;
+
+            for (int i = 0; i < section3Entries.Length; i++)
+            {
+                if (section3Entries[i].unknown1 > greatestUnknown1)
+                    greatestUnknown1 = section3Entries[i].unknown1;
+
+                if (section3Entries[i].unknown2 > greatestUnknown2)
+                    greatestUnknown2 = section3Entries[i].unknown2;
+
+                if (section3Entries[i].unknown3 > greatestUnknown3)
+                    greatestUnknown3 = section3Entries[i].unknown3;
+
+                if (section3Entries[i].id > greatestId)
+                    greatestId = section3Entries[i].id;
+            } //for
+
+            Console.WriteLine("The greatest unknown1 is: " + greatestUnknown1.ToString("x"));
+            Console.WriteLine("The greatest unknown2 is: " + greatestUnknown2.ToString("x"));
+            Console.WriteLine("The greatest unknown3 is: " + greatestUnknown3.ToString("x"));
+            Console.WriteLine("The greatest id is: " + greatestId.ToString("x"));
+        } //OutputSection2Info
+
+        [Conditional("DEBUG")]
+        public void OutputSection5Info()
+        {
+            ushort greatestUnknown0 = 0;
+            ushort greatestEntry = 0;
+            for (int i = 0; i < section5Entries.Length; i++)
+            {
+                if (section5Entries[i].unknown0 > greatestUnknown0)
+                    greatestUnknown0 = section5Entries[i].unknown0;
+
+                for (int j = 0; j < section5Entries[i].entries.Length; j++)
+                    if (section5Entries[i].entries[j] > greatestEntry)
+                        greatestEntry = section5Entries[i].entries[j];
+            } //for
+
+            Console.WriteLine("The greatest unknown0 is: " + greatestUnknown0.ToString("x"));
+            Console.WriteLine("The greatest entry is: " + greatestEntry.ToString("x"));
         } //OutputSection2Info
 
         public void OutputSection7Info()
