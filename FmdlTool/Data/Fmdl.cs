@@ -23,7 +23,7 @@ namespace FmdlTool
 
         private struct Section0Block0Entry
         {
-            public ushort id;
+            public ushort nameId;
             public ushort parentId;
             public ushort unknown0; //id of some sort
             public ushort unknown1; //always 0x1?
@@ -239,7 +239,7 @@ namespace FmdlTool
 
             for (int i = 0; i < section0Block0Entries.Length; i++)
             {
-                section0Block0Entries[i].id = reader.ReadUInt16();
+                section0Block0Entries[i].nameId = reader.ReadUInt16();
                 section0Block0Entries[i].parentId = reader.ReadUInt16();
                 section0Block0Entries[i].unknown0 = reader.ReadUInt16();
                 section0Block0Entries[i].unknown1 = reader.ReadUInt16();
@@ -469,6 +469,23 @@ namespace FmdlTool
             } //for
             */
         } //Read
+
+        [Conditional("DEBUG")]
+        public void OutputSection0Block0Info()
+        {
+            for (int i = 0; i < section0Block0Entries.Length; i++)
+            {
+                Console.WriteLine("================================");
+                Console.WriteLine("Entry ID: " + i);
+                Console.WriteLine("Bone Name: " + Hashing.TryGetName(section0Block16Entries[section0Block0Entries[i].nameId]));
+                Console.Write("Parent Bone: ");
+
+                if (section0Block0Entries[i].parentId != 0xFFFF)
+                    Console.WriteLine(Hashing.TryGetName(section0Block16Entries[section0Block0Entries[section0Block0Entries[i].parentId].nameId]));
+                else
+                    Console.WriteLine("Root");
+            } //for
+        } //OutputSection0Block0Info
 
         public void OutputSection0Block2Info()
         {
