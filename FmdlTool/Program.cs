@@ -15,7 +15,7 @@ namespace FmdlTool
 
                     Fmdl file = new Fmdl();
                     file.Read(stream);
-                    file.OutputSection0Block0Info();
+                    file.OutputSection0Block2Info();
                     stream.Close();
                 } //using
             Console.ReadKey();

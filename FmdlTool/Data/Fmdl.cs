@@ -41,7 +41,8 @@ namespace FmdlTool
         {
             public ushort nameId;
             public ushort invisibilityFlag;
-            public uint unknown;
+            public ushort parentId;
+            public ushort unknown0; //always 0xFF
         } //struct
 
         private struct Section0Block2Entry
@@ -57,7 +58,7 @@ namespace FmdlTool
         {
             public uint unknown0;
             public ushort unknown1; //probably related to section 0x4
-            public ushort unknown2; //probably related to section 0x5
+            public ushort boneGroupId;
             public ushort id;
             public ushort numVertices;
             public uint faceOffset;
@@ -266,7 +267,8 @@ namespace FmdlTool
             {
                 section0Block1Entries[i].nameId = reader.ReadUInt16();
                 section0Block1Entries[i].invisibilityFlag = reader.ReadUInt16();
-                section0Block1Entries[i].unknown = reader.ReadUInt32();
+                section0Block1Entries[i].parentId = reader.ReadUInt16();
+                section0Block1Entries[i].unknown0 = reader.ReadUInt16();
             } //for
 
             /****************************************************************
@@ -300,7 +302,7 @@ namespace FmdlTool
             {
                 section0Block3Entries[i].unknown0 = reader.ReadUInt32();
                 section0Block3Entries[i].unknown1 = reader.ReadUInt16();
-                section0Block3Entries[i].unknown2 = reader.ReadUInt16();
+                section0Block3Entries[i].boneGroupId = reader.ReadUInt16();
                 section0Block3Entries[i].id = reader.ReadUInt16();
                 section0Block3Entries[i].numVertices = reader.ReadUInt16();
                 reader.BaseStream.Position += 0x4;
@@ -493,7 +495,7 @@ namespace FmdlTool
             {
                 Console.WriteLine("================================");
                 Console.WriteLine("Entry ID: " + section0Block2Entries[i].id);
-                Console.WriteLine("Mesh Group: " + section0Block16Entries[section0Block1Entries[section0Block2Entries[i].meshGroupId].nameId].ToString("x"));
+                Console.WriteLine("Mesh Group: " + Hashing.TryGetName(section0Block16Entries[section0Block1Entries[section0Block2Entries[i].meshGroupId].nameId]));
                 Console.WriteLine("Number of Objects: " + section0Block2Entries[i].numObjects);
                 Console.WriteLine("Number of Preceding Objects: " + section0Block2Entries[i].numPrecedingObjects);
                 Console.WriteLine("Material ID: " + section0Block2Entries[i].materialId);
@@ -513,8 +515,8 @@ namespace FmdlTool
                 if (section0Block3Entries[i].unknown1 > greatestUnknown1)
                     greatestUnknown1 = section0Block3Entries[i].unknown1;
 
-                if (section0Block3Entries[i].unknown2 > greatestUnknown2)
-                    greatestUnknown2 = section0Block3Entries[i].unknown2;
+                if (section0Block3Entries[i].boneGroupId > greatestUnknown2)
+                    greatestUnknown2 = section0Block3Entries[i].boneGroupId;
 
                 if (section0Block3Entries[i].unknown3 > greatestUnknown3)
                     greatestUnknown3 = section0Block3Entries[i].unknown3;
