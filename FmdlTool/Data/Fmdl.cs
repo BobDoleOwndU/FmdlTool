@@ -333,6 +333,7 @@ namespace FmdlTool
              * SECTION 0 BLOCK 0x3 - OBJECT DATA
              *
              ****************************************************************/
+            //go to and get the section 0x3 entry info.
             reader.BaseStream.Position = section0Info[3].offset + section0Offset;
 
             for(int i = 0; i < section0Block3Entries.Length; i++)
@@ -545,11 +546,7 @@ namespace FmdlTool
              *
              ****************************************************************/
             reader.BaseStream.Position = section0BlockEEntries[1].offset + section1Offset + section1Info[1].offset;
-
-
-
-            //THIS IS STUFF
-
+            
             for(int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
             {
                 vbuffer[i].nX = reader.ReadHalf();
