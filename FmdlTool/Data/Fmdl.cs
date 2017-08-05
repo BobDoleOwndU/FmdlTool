@@ -91,9 +91,21 @@ namespace FmdlTool
             public ushort materialNameId;
         } //struct
 
+        private struct SectionAEntry
+        {
+            //TBD....
+        } //struct
+
         private struct Section0BlockDEntry
         {
             public float[] entries;
+        } //struct
+
+        private struct Section0BlockEEntry
+        {
+            public uint unknown0;
+            public uint length;
+            public uint offset;
         } //struct
 
         private struct Section0Block10Entry
@@ -174,6 +186,7 @@ namespace FmdlTool
         private Section0Block7Entry[] section0Block7Entries;
         private Section0Block8Entry[] section0Block8Entries;
         private Section0BlockDEntry[] section0BlockDEntries;
+        private Section0BlockEEntry[] section0BlockEEntries;
         private Section0Block10Entry[] section0Block10Entries;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
@@ -224,6 +237,7 @@ namespace FmdlTool
             section0Block7Entries = new Section0Block7Entry[section0Info[7].numEntries];
             section0Block8Entries = new Section0Block8Entry[section0Info[8].numEntries];
             section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
+            section0BlockEEntries = new Section0BlockEEntry[section0Info[13].numEntries];
             section0Block10Entries = new Section0Block10Entry[section0Info[14].numEntries];
             section0Block15Entries = new ulong[section0Info[18].numEntries];
             section0Block16Entries = new ulong[section0Info[19].numEntries];
@@ -314,7 +328,7 @@ namespace FmdlTool
 
             /****************************************************************
              *
-             * SECTION 0 BLOCK 0x5 - UNKNOWN
+             * SECTION 0 BLOCK 0x5 - BONE GROUPS
              *
              ****************************************************************/
             //go to and get the section 0x5 entry info.
@@ -388,6 +402,22 @@ namespace FmdlTool
 
                 for (int j = 0; j < section0BlockDEntries[i].entries.Length; j++)
                     section0BlockDEntries[i].entries[j] = reader.ReadSingle();
+            } //for
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0xE - BUFFER OFFSETS
+             *
+             ****************************************************************/
+            //go to and get the section 0xD entry info.
+            reader.BaseStream.Position = section0Info[13].offset + section0Offset;
+
+            for (int i = 0; i < section0BlockDEntries.Length; i++)
+            {
+                section0BlockEEntries[i].unknown0 = reader.ReadUInt32();
+                section0BlockEEntries[i].length = reader.ReadUInt32();
+                section0BlockEEntries[i].offset = reader.ReadUInt32();
+                reader.BaseStream.Position += 0x4;
             } //for
 
             /****************************************************************
