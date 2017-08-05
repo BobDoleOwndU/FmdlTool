@@ -91,7 +91,7 @@ namespace FmdlTool
             public ushort materialNameId;
         } //struct
 
-        private struct SectionAEntry
+        private struct Section0BlockAEntry
         {
             //TBD....
         } //struct
@@ -185,6 +185,7 @@ namespace FmdlTool
         private Section0Block6Entry[] section0Block6Entries;
         private Section0Block7Entry[] section0Block7Entries;
         private Section0Block8Entry[] section0Block8Entries;
+        private Section0BlockAEntry[] section0BlockAEntries;
         private Section0BlockDEntry[] section0BlockDEntries;
         private Section0BlockEEntry[] section0BlockEEntries;
         private Section0Block10Entry[] section0Block10Entries;
@@ -236,6 +237,7 @@ namespace FmdlTool
             section0Block6Entries = new Section0Block6Entry[section0Info[6].numEntries];
             section0Block7Entries = new Section0Block7Entry[section0Info[7].numEntries];
             section0Block8Entries = new Section0Block8Entry[section0Info[8].numEntries];
+            section0BlockAEntries = new Section0BlockAEntry[section0Info[10].numEntries];
             section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
             section0BlockEEntries = new Section0BlockEEntry[section0Info[13].numEntries];
             section0Block10Entries = new Section0Block10Entry[section0Info[14].numEntries];
@@ -387,6 +389,21 @@ namespace FmdlTool
                 section0Block8Entries[i].nameId = reader.ReadUInt16();
                 section0Block8Entries[i].materialNameId = reader.ReadUInt16();
             } //for
+
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0xA - UNKNOWN - VERTEX DEFINITION RELATED
+             *
+             
+            //go to and get the section 0xA entry info.
+            reader.BaseStream.Position = section0Info[10].offset + section0Offset;
+
+            for (int i = 0; i < section0BlockAEntries.Length; i++)
+            {
+                //...TBD
+            } //for
+             ****************************************************************/
 
             /****************************************************************
              *
