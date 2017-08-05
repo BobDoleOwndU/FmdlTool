@@ -194,7 +194,7 @@ namespace FmdlTool
          * 18 = 0x15
          * 19 = 0x16
          */
-            private Section0Info[] section0Info;
+        private Section0Info[] section0Info;
         private Section1Info[] section1Info;
 
         private Section0Block0Entry[] section0Block0Entries;
@@ -573,26 +573,6 @@ namespace FmdlTool
                 vbuffer[i].unknownFloat2 = vbuffer[i].unknownFloat2 / vbuffer[i].floatDivisor;
                 vbuffer[i].unknownFloat3 = vbuffer[i].unknownFloat3 / vbuffer[i].floatDivisor;
             } //for
-
-            //THIS IS NOT REAL STUFF
-
-            for (int i = 0; i < section0Block2Entries.Length; i++)
-            {
-                reader.BaseStream.Position += 0x4;
-                section0Block2Entries[i].meshGroupId = reader.ReadUInt16();
-                section0Block2Entries[i].numObjects = reader.ReadUInt16();
-                section0Block2Entries[i].numPrecedingObjects = reader.ReadUInt16();
-                section0Block2Entries[i].id = reader.ReadUInt16();
-                reader.BaseStream.Position += 0x4;
-                section0Block2Entries[i].materialId = reader.ReadUInt16();
-                reader.BaseStream.Position += 0xE;
-            } //for
-
-
-
-
-
-
         } //Read
 
         [Conditional("DEBUG")]
