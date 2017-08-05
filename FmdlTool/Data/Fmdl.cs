@@ -565,10 +565,10 @@ namespace FmdlTool
                 vbuffer[i].uvX = reader.ReadHalf();
                 vbuffer[i].uvY = reader.ReadHalf();
 
-                vbuffer[i].unknownFloat0 = vbuffer[i].unknownFloat0 / vbuffer[i].floatDivisor;
-                vbuffer[i].unknownFloat1 = vbuffer[i].unknownFloat1 / vbuffer[i].floatDivisor;
-                vbuffer[i].unknownFloat2 = vbuffer[i].unknownFloat2 / vbuffer[i].floatDivisor;
-                vbuffer[i].unknownFloat3 = vbuffer[i].unknownFloat3 / vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat0 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat1 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat2 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat3 /= vbuffer[i].floatDivisor;
             } //for
         } //Read
 
