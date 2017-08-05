@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using static System.Half;
 
 namespace FmdlTool
 {
@@ -129,6 +130,25 @@ namespace FmdlTool
             public Face[] faces;
         } //struct
 
+        private struct VBuffer //Not actually the vbuffer, the entire section containing the vertex positions, add. vertex data and faces all make up the VBuffer.
+        {
+            public Half nX;
+            public Half nY;
+            public Half nZ;
+            public Half nW;
+
+            public Half unknownFloat0; //
+            public Half unknownFloat1; // I think these are the bone weight floats but I can't remember.
+            public Half unknownFloat2; // Due to the fact I can't remember these are just going to be unknowns right now.
+            public Half unknownFloat3; //
+
+            public uint floatDivisor; //I am pretty sure this is what this does. Working without documentation is difficult.
+            public uint unknown5;
+
+            public Half uvX;
+            public Half uvY;
+        } //struct
+
         private struct Face
         {
             public ushort v1;
@@ -174,7 +194,7 @@ namespace FmdlTool
          * 18 = 0x15
          * 19 = 0x16
          */
-        private Section0Info[] section0Info;
+            private Section0Info[] section0Info;
         private Section1Info[] section1Info;
 
         private Section0Block0Entry[] section0Block0Entries;
@@ -189,6 +209,7 @@ namespace FmdlTool
         private Section0BlockDEntry[] section0BlockDEntries;
         private Section0BlockEEntry[] section0BlockEEntries;
         private Section0Block10Entry[] section0Block10Entries;
+        private VBuffer[] vbuffer;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
 
@@ -395,7 +416,7 @@ namespace FmdlTool
              *
              * SECTION 0 BLOCK 0xA - UNKNOWN - VERTEX DEFINITION RELATED
              *
-             
+             ****************************************************************/
             //go to and get the section 0xA entry info.
             reader.BaseStream.Position = section0Info[10].offset + section0Offset;
 
@@ -403,7 +424,7 @@ namespace FmdlTool
             {
                 //...TBD
             } //for
-             ****************************************************************/
+             
 
             /****************************************************************
              *
@@ -517,6 +538,61 @@ namespace FmdlTool
                 } //for
             } //for
             */
+
+            /****************************************************************
+             *
+             * VERTEX BUFFER, KINDA
+             *
+             ****************************************************************/
+            reader.BaseStream.Position = section0BlockEEntries[1].offset + section1Offset + section1Info[1].offset;
+
+
+
+            //THIS IS STUFF
+
+            for(int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
+            {
+                vbuffer[i].nX = reader.ReadHalf();
+                vbuffer[i].nY = reader.ReadHalf();
+                vbuffer[i].nZ = reader.ReadHalf();
+                vbuffer[i].nW = reader.ReadHalf();
+
+                vbuffer[i].unknownFloat0 = reader.ReadHalf();
+                vbuffer[i].unknownFloat1 = reader.ReadHalf();
+                vbuffer[i].unknownFloat2 = reader.ReadHalf();
+                vbuffer[i].unknownFloat3 = reader.ReadHalf();
+
+                vbuffer[i].floatDivisor = reader.ReadUInt32();
+                vbuffer[i].unknown5 = reader.ReadUInt32();
+
+                vbuffer[i].uvX = reader.ReadHalf();
+                vbuffer[i].uvY = reader.ReadHalf();
+
+                vbuffer[i].unknownFloat0 = vbuffer[i].unknownFloat0 / vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat1 = vbuffer[i].unknownFloat1 / vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat2 = vbuffer[i].unknownFloat2 / vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat3 = vbuffer[i].unknownFloat3 / vbuffer[i].floatDivisor;
+            } //for
+
+            //THIS IS NOT REAL STUFF
+
+            for (int i = 0; i < section0Block2Entries.Length; i++)
+            {
+                reader.BaseStream.Position += 0x4;
+                section0Block2Entries[i].meshGroupId = reader.ReadUInt16();
+                section0Block2Entries[i].numObjects = reader.ReadUInt16();
+                section0Block2Entries[i].numPrecedingObjects = reader.ReadUInt16();
+                section0Block2Entries[i].id = reader.ReadUInt16();
+                reader.BaseStream.Position += 0x4;
+                section0Block2Entries[i].materialId = reader.ReadUInt16();
+                reader.BaseStream.Position += 0xE;
+            } //for
+
+
+
+
+
+
         } //Read
 
         [Conditional("DEBUG")]
