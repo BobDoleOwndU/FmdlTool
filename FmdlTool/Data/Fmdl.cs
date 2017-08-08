@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using static System.Half;
 
 namespace FmdlTool
 {
@@ -91,7 +92,7 @@ namespace FmdlTool
             public ushort materialNameId;
         } //struct
 
-        private struct SectionAEntry
+        private struct Section0BlockAEntry
         {
             //TBD....
         } //struct
@@ -127,6 +128,25 @@ namespace FmdlTool
         {
             public Vertex[] vertices;
             public Face[] faces;
+        } //struct
+
+        private struct VBuffer //Not actually the vbuffer, the entire section containing the vertex positions, add. vertex data and faces all make up the VBuffer.
+        {
+            public Half nX;
+            public Half nY;
+            public Half nZ;
+            public Half nW;
+
+            public Half unknownFloat0; //
+            public Half unknownFloat1; // I think these are the bone weight floats but I can't remember.
+            public Half unknownFloat2; // Due to the fact I can't remember these are just going to be unknowns right now.
+            public Half unknownFloat3; //
+
+            public uint floatDivisor; //I am pretty sure this is what this does. Working without documentation is difficult.
+            public uint unknown5;
+
+            public Half uvX;
+            public Half uvY;
         } //struct
 
         private struct Face
@@ -185,9 +205,11 @@ namespace FmdlTool
         private Section0Block6Entry[] section0Block6Entries;
         private Section0Block7Entry[] section0Block7Entries;
         private Section0Block8Entry[] section0Block8Entries;
+        private Section0BlockAEntry[] section0BlockAEntries;
         private Section0BlockDEntry[] section0BlockDEntries;
         private Section0BlockEEntry[] section0BlockEEntries;
         private Section0Block10Entry[] section0Block10Entries;
+        private VBuffer[] vbuffer;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
 
@@ -236,6 +258,7 @@ namespace FmdlTool
             section0Block6Entries = new Section0Block6Entry[section0Info[6].numEntries];
             section0Block7Entries = new Section0Block7Entry[section0Info[7].numEntries];
             section0Block8Entries = new Section0Block8Entry[section0Info[8].numEntries];
+            section0BlockAEntries = new Section0BlockAEntry[section0Info[10].numEntries];
             section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
             section0BlockEEntries = new Section0BlockEEntry[section0Info[13].numEntries];
             section0Block10Entries = new Section0Block10Entry[section0Info[14].numEntries];
@@ -310,6 +333,7 @@ namespace FmdlTool
              * SECTION 0 BLOCK 0x3 - OBJECT DATA
              *
              ****************************************************************/
+            //go to and get the section 0x3 entry info.
             reader.BaseStream.Position = section0Info[3].offset + section0Offset;
 
             for(int i = 0; i < section0Block3Entries.Length; i++)
@@ -387,6 +411,21 @@ namespace FmdlTool
                 section0Block8Entries[i].nameId = reader.ReadUInt16();
                 section0Block8Entries[i].materialNameId = reader.ReadUInt16();
             } //for
+
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0xA - UNKNOWN - VERTEX DEFINITION RELATED
+             *
+             ****************************************************************/
+            //go to and get the section 0xA entry info.
+            reader.BaseStream.Position = section0Info[10].offset + section0Offset;
+
+            for (int i = 0; i < section0BlockAEntries.Length; i++)
+            {
+                //...TBD
+            } //for
+             
 
             /****************************************************************
              *
@@ -500,6 +539,37 @@ namespace FmdlTool
                 } //for
             } //for
             */
+
+            /****************************************************************
+             *
+             * VERTEX BUFFER, KINDA
+             *
+             ****************************************************************/
+            reader.BaseStream.Position = section0BlockEEntries[1].offset + section1Offset + section1Info[1].offset;
+            
+            for(int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
+            {
+                vbuffer[i].nX = reader.ReadHalf();
+                vbuffer[i].nY = reader.ReadHalf();
+                vbuffer[i].nZ = reader.ReadHalf();
+                vbuffer[i].nW = reader.ReadHalf();
+
+                vbuffer[i].unknownFloat0 = reader.ReadHalf();
+                vbuffer[i].unknownFloat1 = reader.ReadHalf();
+                vbuffer[i].unknownFloat2 = reader.ReadHalf();
+                vbuffer[i].unknownFloat3 = reader.ReadHalf();
+
+                vbuffer[i].floatDivisor = reader.ReadUInt32();
+                vbuffer[i].unknown5 = reader.ReadUInt32();
+
+                vbuffer[i].uvX = reader.ReadHalf();
+                vbuffer[i].uvY = reader.ReadHalf();
+
+                vbuffer[i].unknownFloat0 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat1 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat2 /= vbuffer[i].floatDivisor;
+                vbuffer[i].unknownFloat3 /= vbuffer[i].floatDivisor;
+            } //for
         } //Read
 
         [Conditional("DEBUG")]
