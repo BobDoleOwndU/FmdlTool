@@ -229,11 +229,11 @@ namespace FmdlTool
             section1Offset = reader.ReadUInt32();
             section1Length = reader.ReadUInt32();
             reader.BaseStream.Position += 0x8; //8 bytes of padding here.
-            
+
             section0Info = new Section0Info[numSection0Blocks];
 
             //get the section0 info.
-            for(int i = 0; i < section0Info.Length; i++)
+            for (int i = 0; i < section0Info.Length; i++)
             {
                 section0Info[i].id = reader.ReadUInt16();
                 section0Info[i].numEntries = reader.ReadUInt16();
@@ -300,7 +300,7 @@ namespace FmdlTool
             //go to and get the section 0x1 entry info.
             reader.BaseStream.Position = section0Info[1].offset + section0Offset;
 
-            for(int i = 0; i < section0Block1Entries.Length; i++)
+            for (int i = 0; i < section0Block1Entries.Length; i++)
             {
                 section0Block1Entries[i].nameId = reader.ReadUInt16();
                 section0Block1Entries[i].invisibilityFlag = reader.ReadUInt16();
@@ -336,7 +336,7 @@ namespace FmdlTool
             //go to and get the section 0x3 entry info.
             reader.BaseStream.Position = section0Info[3].offset + section0Offset;
 
-            for(int i = 0; i < section0Block3Entries.Length; i++)
+            for (int i = 0; i < section0Block3Entries.Length; i++)
             {
                 section0Block3Entries[i].unknown0 = reader.ReadUInt32();
                 section0Block3Entries[i].unknown1 = reader.ReadUInt16();
@@ -358,7 +358,7 @@ namespace FmdlTool
             //go to and get the section 0x5 entry info.
             reader.BaseStream.Position = section0Info[5].offset + section0Offset;
 
-            for(int i = 0; i < section0Block5Entries.Length; i++)
+            for (int i = 0; i < section0Block5Entries.Length; i++)
             {
                 section0Block5Entries[i].unknown0 = reader.ReadUInt16();
                 section0Block5Entries[i].numEntries = reader.ReadUInt16();
@@ -425,7 +425,7 @@ namespace FmdlTool
             {
                 //...TBD
             } //for
-             
+
 
             /****************************************************************
              *
@@ -508,11 +508,11 @@ namespace FmdlTool
              ****************************************************************/
             reader.BaseStream.Position = section1Info[1].offset + section1Offset;
 
-            for(int i = 0; i < section0Block3Entries.Length; i++)
+            for (int i = 0; i < section0Block3Entries.Length; i++)
             {
                 objects[i].vertices = new Vertex[section0Block3Entries[i].numVertices];
 
-                for(int j = 0; j < section0Block3Entries[i].numVertices; j++)
+                for (int j = 0; j < section0Block3Entries[i].numVertices; j++)
                 {
                     objects[i].vertices[j].x = reader.ReadSingle();
                     objects[i].vertices[j].y = reader.ReadSingle();
@@ -546,24 +546,24 @@ namespace FmdlTool
              *
              ****************************************************************/
             reader.BaseStream.Position = section0BlockEEntries[1].offset + section1Offset + section1Info[1].offset;
-            
-            for(int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
-            {
-                vbuffer[i].nX = reader.ReadHalf();
-                vbuffer[i].nY = reader.ReadHalf();
-                vbuffer[i].nZ = reader.ReadHalf();
-                vbuffer[i].nW = reader.ReadHalf();
 
-                vbuffer[i].unknownFloat0 = reader.ReadHalf();
-                vbuffer[i].unknownFloat1 = reader.ReadHalf();
-                vbuffer[i].unknownFloat2 = reader.ReadHalf();
-                vbuffer[i].unknownFloat3 = reader.ReadHalf();
+            for (int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
+            {
+                vbuffer[i].nX = ToHalf(reader.ReadUInt16());
+                vbuffer[i].nY = ToHalf(reader.ReadUInt16());
+                vbuffer[i].nZ = ToHalf(reader.ReadUInt16());
+                vbuffer[i].nW = ToHalf(reader.ReadUInt16());
+
+                vbuffer[i].unknownFloat0 = ToHalf(reader.ReadUInt16());
+                vbuffer[i].unknownFloat1 = ToHalf(reader.ReadUInt16());
+                vbuffer[i].unknownFloat2 = ToHalf(reader.ReadUInt16());
+                vbuffer[i].unknownFloat3 = ToHalf(reader.ReadUInt16());
 
                 vbuffer[i].floatDivisor = reader.ReadUInt32();
                 vbuffer[i].unknown5 = reader.ReadUInt32();
 
-                vbuffer[i].uvX = reader.ReadHalf();
-                vbuffer[i].uvY = reader.ReadHalf();
+                vbuffer[i].uvX = ToHalf(reader.ReadUInt16());
+                vbuffer[i].uvY = ToHalf(reader.ReadUInt16());
 
                 vbuffer[i].unknownFloat0 /= vbuffer[i].floatDivisor;
                 vbuffer[i].unknownFloat1 /= vbuffer[i].floatDivisor;
@@ -591,7 +591,7 @@ namespace FmdlTool
 
         public void OutputSection0Block2Info()
         {
-            for(int i = 0; i < section0Block2Entries.Length; i++)
+            for (int i = 0; i < section0Block2Entries.Length; i++)
             {
                 Console.WriteLine("================================");
                 Console.WriteLine("Entry ID: " + section0Block2Entries[i].id);
