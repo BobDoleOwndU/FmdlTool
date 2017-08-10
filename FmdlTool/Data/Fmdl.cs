@@ -94,7 +94,11 @@ namespace FmdlTool
 
         private struct Section0BlockAEntry
         {
-            //TBD....
+            public byte unknown0; //always 0 for first entry and 1 for others?
+            public byte unknown1; //entry type 0 has 1. entry type 1 has 2. entry type 2 has 1. entry type 3 has 3.
+            public byte entryLength; //length for whatever data it's pointing to.
+            public byte entryType; //seems to identify the type of data it's associated with. 1 is for the "vertex buffer" I think.
+            public uint offset; //this offset is where the entry lands in its respective list.
         } //struct
 
         private struct Section0BlockDEntry
@@ -424,7 +428,11 @@ namespace FmdlTool
 
             for (int i = 0; i < section0BlockAEntries.Length; i++)
             {
-                //...TBD
+                section0BlockAEntries[i].unknown0 = reader.ReadByte();
+                section0BlockAEntries[i].unknown1 = reader.ReadByte();
+                section0BlockAEntries[i].entryLength = reader.ReadByte();
+                section0BlockAEntries[i].entryType = reader.ReadByte();
+                section0BlockAEntries[i].offset = reader.ReadUInt32();
             } //for
 
 
