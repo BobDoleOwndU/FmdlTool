@@ -28,14 +28,14 @@ namespace FmdlTool
             public ushort parentId;
             public ushort unknown0; //id of some sort
             public ushort unknown1; //always 0x1?
-            public float x0;
-            public float y0;
-            public float z0;
-            public float w0;
-            public float x1;
-            public float y1;
-            public float z1;
-            public float w1;
+            public float positionX;
+            public float positionY;
+            public float positionZ;
+            public float positionW;
+            public float rotationX;
+            public float rotationY;
+            public float rotationZ;
+            public float rotationW;
         } //struct
 
         private struct Section0Block1Entry
@@ -111,6 +111,7 @@ namespace FmdlTool
 
         private struct Section0Block10Entry
         {
+            //variables here are assumptions. may not be correct.
             public uint unknown0;
             public float highDetailDistance;
             public float midDetailDistance;
@@ -132,10 +133,10 @@ namespace FmdlTool
 
         private struct VBuffer //Not actually the vbuffer, the entire section containing the vertex positions, add. vertex data and faces all make up the VBuffer.
         {
-            public Half nX;
-            public Half nY;
-            public Half nZ;
-            public Half nW;
+            public Half normalX;
+            public Half normalY;
+            public Half normalZ;
+            public Half normalW;
 
             public Half unknownFloat0; //
             public Half unknownFloat1; // I think these are the bone weight floats but I can't remember.
@@ -145,15 +146,15 @@ namespace FmdlTool
             public uint floatDivisor; //I am pretty sure this is what this does. Working without documentation is difficult.
             public uint unknown5;
 
-            public Half uvX;
-            public Half uvY;
+            public Half textureU; //UV U coordinate
+            public Half textureV; //UV V coordinate
         } //struct
 
         private struct Face
         {
-            public ushort v1;
-            public ushort v2;
-            public ushort v3;
+            public ushort vertex1Id;
+            public ushort vertex2Id;
+            public ushort vertex3Id;
         } //struct
 
         //local variables
@@ -282,14 +283,14 @@ namespace FmdlTool
                 section0Block0Entries[i].unknown0 = reader.ReadUInt16();
                 section0Block0Entries[i].unknown1 = reader.ReadUInt16();
                 reader.BaseStream.Position += 0x8;
-                section0Block0Entries[i].x0 = reader.ReadSingle();
-                section0Block0Entries[i].y0 = reader.ReadSingle();
-                section0Block0Entries[i].z0 = reader.ReadSingle();
-                section0Block0Entries[i].w0 = reader.ReadSingle();
-                section0Block0Entries[i].x1 = reader.ReadSingle();
-                section0Block0Entries[i].y1 = reader.ReadSingle();
-                section0Block0Entries[i].z1 = reader.ReadSingle();
-                section0Block0Entries[i].w1 = reader.ReadSingle();
+                section0Block0Entries[i].positionX = reader.ReadSingle();
+                section0Block0Entries[i].positionY = reader.ReadSingle();
+                section0Block0Entries[i].positionZ = reader.ReadSingle();
+                section0Block0Entries[i].positionW = reader.ReadSingle();
+                section0Block0Entries[i].rotationX = reader.ReadSingle();
+                section0Block0Entries[i].rotationY = reader.ReadSingle();
+                section0Block0Entries[i].rotationZ = reader.ReadSingle();
+                section0Block0Entries[i].rotationW = reader.ReadSingle();
             } //for
 
             /****************************************************************
@@ -533,9 +534,9 @@ namespace FmdlTool
 
                 for(int j = 0; j < section3Entries[i].numFaceVertices / 3; j++)
                 {
-                    objects[i].faces[j].v1 = reader.ReadUInt16();
-                    objects[i].faces[j].v2 = reader.ReadUInt16();
-                    objects[i].faces[j].v3 = reader.ReadUInt16();
+                    objects[i].faces[j].vertex1Id = reader.ReadUInt16();
+                    objects[i].faces[j].vertex2Id = reader.ReadUInt16();
+                    objects[i].faces[j].vertex3Id = reader.ReadUInt16();
                 } //for
             } //for
             */
@@ -549,10 +550,10 @@ namespace FmdlTool
 
             for (int i = 0; i < section0BlockEEntries[1].length; i++) //This .length thing won't actually work but I am going to leave it for now because we don't actually know how much padding and how it is formatted right now.
             {
-                vbuffer[i].nX = ToHalf(reader.ReadUInt16());
-                vbuffer[i].nY = ToHalf(reader.ReadUInt16());
-                vbuffer[i].nZ = ToHalf(reader.ReadUInt16());
-                vbuffer[i].nW = ToHalf(reader.ReadUInt16());
+                vbuffer[i].normalX = ToHalf(reader.ReadUInt16());
+                vbuffer[i].normalY = ToHalf(reader.ReadUInt16());
+                vbuffer[i].normalZ = ToHalf(reader.ReadUInt16());
+                vbuffer[i].normalW = ToHalf(reader.ReadUInt16());
 
                 vbuffer[i].unknownFloat0 = ToHalf(reader.ReadUInt16());
                 vbuffer[i].unknownFloat1 = ToHalf(reader.ReadUInt16());
@@ -562,8 +563,8 @@ namespace FmdlTool
                 vbuffer[i].floatDivisor = reader.ReadUInt32();
                 vbuffer[i].unknown5 = reader.ReadUInt32();
 
-                vbuffer[i].uvX = ToHalf(reader.ReadUInt16());
-                vbuffer[i].uvY = ToHalf(reader.ReadUInt16());
+                vbuffer[i].textureU = ToHalf(reader.ReadUInt16());
+                vbuffer[i].textureV = ToHalf(reader.ReadUInt16());
 
                 vbuffer[i].unknownFloat0 /= vbuffer[i].floatDivisor;
                 vbuffer[i].unknownFloat1 /= vbuffer[i].floatDivisor;
