@@ -628,8 +628,6 @@ namespace FmdlTool
              * FACES
              *
              ****************************************************************/
-            reader.BaseStream.Position = section0BlockEEntries[2].offset + section1Offset + section1Info[1].offset;
-
             for (int i = 0; i < objects.Length; i++)
             {
                 reader.BaseStream.Position = section0BlockEEntries[2].offset + section1Offset + section1Info[1].offset + section0Block3Entries[i].numPrecedingFaceVertices * 2;
