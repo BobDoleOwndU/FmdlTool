@@ -116,10 +116,17 @@ namespace FmdlTool
         private struct Section0Block10Entry
         {
             //variables here are assumptions. may not be correct.
-            public uint unknown0;
+            public uint lodNum; //this number indicates how many LODs there are. block 0x11 is the number of block 3 entries multiplied by this number.
             public float highDetailDistance;
             public float midDetailDistance;
             public float lowDetailDistance;
+        } //struct
+
+        private struct Section0Block11Entry
+        {
+            //not 100% sure these are correct. but they seem likely.
+            public uint numPrecedingFaceVertices;
+            public uint numFaceVertices;
         } //struct
 
         private struct Vertex
@@ -228,6 +235,7 @@ namespace FmdlTool
         private Section0BlockDEntry[] section0BlockDEntries;
         private Section0BlockEEntry[] section0BlockEEntries;
         private Section0Block10Entry[] section0Block10Entries;
+        private Section0Block11Entry[] section0Block11Entries;
         private AdditionalVertexData[] vbuffer;
         private ulong[] section0Block15Entries;
         private ulong[] section0Block16Entries;
@@ -281,6 +289,7 @@ namespace FmdlTool
             section0BlockDEntries = new Section0BlockDEntry[section0Info[12].numEntries];
             section0BlockEEntries = new Section0BlockEEntry[section0Info[13].numEntries];
             section0Block10Entries = new Section0Block10Entry[section0Info[14].numEntries];
+            section0Block11Entries = new Section0Block11Entry[section0Info[15].numEntries];
             section0Block15Entries = new ulong[section0Info[18].numEntries];
             section0Block16Entries = new ulong[section0Info[19].numEntries];
 
@@ -492,10 +501,24 @@ namespace FmdlTool
 
             for (int i = 0; i < section0Block10Entries.Length; i++)
             {
-                section0Block10Entries[i].unknown0 = reader.ReadUInt32();
+                section0Block10Entries[i].lodNum = reader.ReadUInt32();
                 section0Block10Entries[i].highDetailDistance = reader.ReadSingle();
                 section0Block10Entries[i].midDetailDistance = reader.ReadSingle();
                 section0Block10Entries[i].lowDetailDistance = reader.ReadSingle();
+            } //for
+
+            /****************************************************************
+             *
+             * SECTION 0 BLOCK 0x11 - LOD FACES (I think)
+             *
+             ****************************************************************/
+            //go to and get the section 0x10 entry info.
+            reader.BaseStream.Position = section0Info[15].offset + section0Offset;
+
+            for (int i = 0; i < section0Block11Entries.Length; i++)
+            {
+                section0Block11Entries[i].numPrecedingFaceVertices = reader.ReadUInt32();
+                section0Block11Entries[i].numFaceVertices = reader.ReadUInt32();
             } //for
 
             /****************************************************************
@@ -589,7 +612,7 @@ namespace FmdlTool
                         objects[i].additionalVertexData[j].boneGroup2Id = reader.ReadByte();
                         objects[i].additionalVertexData[j].boneGroup3Id = reader.ReadByte();
 
-                        if(section0BlockAEntries[section0BlockACount].length == 0x20 ||
+                        if (section0BlockAEntries[section0BlockACount].length == 0x20 ||
                             section0BlockAEntries[section0BlockACount].length == 0x2C)
                         {
                             objects[i].additionalVertexData[j].unknown4 = reader.ReadSingle();
@@ -598,7 +621,7 @@ namespace FmdlTool
                         objects[i].additionalVertexData[j].textureU = ToHalf(reader.ReadUInt16());
                         objects[i].additionalVertexData[j].textureV = ToHalf(reader.ReadUInt16()) * -1; //value is negated.
 
-                        if(section0BlockAEntries[section0BlockACount].length == 0x24)
+                        if (section0BlockAEntries[section0BlockACount].length == 0x24)
                         {
                             objects[i].additionalVertexData[j].unknown5 = reader.ReadSingle();
                             objects[i].additionalVertexData[j].unknown6 = reader.ReadSingle();
@@ -634,7 +657,7 @@ namespace FmdlTool
 
                 objects[i].faces = new Face[section0Block3Entries[i].numFaceVertices / 3];
 
-                for(int j = 0; j < objects[i].faces.Length; j++)
+                for (int j = 0; j < objects[i].faces.Length; j++)
                 {
                     objects[i].faces[j].vertex1Id = reader.ReadUInt16();
                     objects[i].faces[j].vertex2Id = reader.ReadUInt16();
@@ -674,21 +697,21 @@ namespace FmdlTool
                 Console.WriteLine("Material ID: " + section0Block2Entries[i].materialId);
             } //for
         } //OutputSection2Info
-        
+
         public void OutputSection0Block3Info()
         {
             for (int i = 0; i < section0Block3Entries.Length; i++)
             {
                 Console.WriteLine("================================");
                 Console.WriteLine("Entry No: " + i);
-                Console.WriteLine("Unknown 0: " + section0Block3Entries[i].unknown0);
-                Console.WriteLine("Unknown 1: " + section0Block3Entries[i].unknown1);
-                Console.WriteLine("Bone Group Id: " + section0Block3Entries[i].boneGroupId);
-                Console.WriteLine("Id: " + section0Block3Entries[i].id);
-                Console.WriteLine("Num Vertices " + section0Block3Entries[i].numVertices);
-                Console.WriteLine("Face Offset: " + section0Block3Entries[i].numPrecedingFaceVertices);
-                Console.WriteLine("Num Face Vertices: " + section0Block3Entries[i].numFaceVertices);
-                Console.WriteLine("Unknown 2: " + section0Block3Entries[i].unknown2);
+                Console.WriteLine("Unknown 0: " + section0Block3Entries[i].unknown0.ToString("x"));
+                Console.WriteLine("Unknown 1: " + section0Block3Entries[i].unknown1.ToString("x"));
+                Console.WriteLine("Bone Group Id: " + section0Block3Entries[i].boneGroupId.ToString("x"));
+                Console.WriteLine("Id: " + section0Block3Entries[i].id.ToString("x"));
+                Console.WriteLine("Num Vertices: " + section0Block3Entries[i].numVertices.ToString("x"));
+                Console.WriteLine("Preceding Face Vertices: " + section0Block3Entries[i].numPrecedingFaceVertices.ToString("x"));
+                Console.WriteLine("Num Face Vertices: " + section0Block3Entries[i].numFaceVertices.ToString("x"));
+                Console.WriteLine("Unknown 2: " + section0Block3Entries[i].unknown2.ToString("x"));
             } //for
         } //OutputSection2Info
 
@@ -780,7 +803,7 @@ namespace FmdlTool
         [Conditional("DEBUG")]
         public void OutputObjectInfo()
         {
-            for(int i = 0; i < objects.Length; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 Console.WriteLine("================================");
                 Console.WriteLine("Entry No: " + i);
